@@ -1,0 +1,30 @@
+From 77b455927b7ff1fca11e54046116354619f30914 Mon Sep 17 00:00:00 2001
+From: Thijs Vermeir <thijsvermeir@gmail.com>
+Date: Thu, 28 Apr 2016 22:42:25 +0200
+Subject: [PATCH 2/2] uClibc does not have CEXP and CEXPL
+
+Signed-off-by: Thijs Vermeir <thijsvermeir@gmail.com>
+---
+ numpy/core/src/private/npy_config.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/numpy/core/src/private/npy_config.h b/numpy/core/src/private/npy_config.h
+index 5f8aa3b..b581068 100644
+--- a/numpy/core/src/private/npy_config.h
++++ b/numpy/core/src/private/npy_config.h
+@@ -61,6 +61,12 @@
+ 
+ #endif
+ 
++#if defined(__UCLIBC__)
++
++#undef HAVE_CEXP
++#undef HAVE_CEXPF
++
++#endif
+ 
+ /* Intel C for Windows uses POW for 64 bits longdouble*/
+ #if defined(_MSC_VER) && defined(__INTEL_COMPILER)
+-- 
+2.1.0
+
