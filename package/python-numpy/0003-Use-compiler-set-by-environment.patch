@@ -1,0 +1,38 @@
+From edff093f80daf4477ff0d01698ef3424e4881ada Mon Sep 17 00:00:00 2001
+From: Thijs Vermeir <thijsvermeir@gmail.com>
+Date: Fri, 6 May 2016 10:01:16 +0200
+Subject: [PATCH] Use compiler set by environment
+
+---
+ numpy/distutils/ccompiler.py     | 2 +-
+ numpy/distutils/unixccompiler.py | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/numpy/distutils/ccompiler.py b/numpy/distutils/ccompiler.py
+index 2f2d63b..e90bab8 100644
+--- a/numpy/distutils/ccompiler.py
++++ b/numpy/distutils/ccompiler.py
+@@ -183,7 +183,7 @@ def CCompiler_compile(self, sources, output_dir=None, macros=None,
+     macros, objects, extra_postargs, pp_opts, build = \
+             self._setup_compile(output_dir, macros, include_dirs, sources,
+                                 depends, extra_postargs)
+-    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
++    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs) + ['-fPIC']
+     display = "compile options: '%s'" % (' '.join(cc_args))
+     if extra_postargs:
+         display += "\nextra options: '%s'" % (' '.join(extra_postargs))
+diff --git a/numpy/distutils/unixccompiler.py b/numpy/distutils/unixccompiler.py
+index a92ccd3..55e3460 100644
+--- a/numpy/distutils/unixccompiler.py
++++ b/numpy/distutils/unixccompiler.py
+@@ -20,6 +20,7 @@ else:
+ def UnixCCompiler__compile(self, obj, src, ext, cc_args, extra_postargs, pp_opts):
+     """Compile a single source files with a Unix-style compiler."""
+     # HP ad-hoc fix, see ticket 1383
++    self.compiler_so = [os.environ.get ('CC')]
+     ccomp = self.compiler_so
+     if ccomp[0] == 'aCC':
+         # remove flags that will trigger ANSI-C mode for aCC
+-- 
+2.1.0
+

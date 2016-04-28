@@ -1,0 +1,51 @@
+From 74c7e7d99befde1f4fcd5004c7d63e6c674493fa Mon Sep 17 00:00:00 2001
+From: Thijs Vermeir <thijsvermeir@gmail.com>
+Date: Thu, 28 Apr 2016 21:02:36 +0200
+Subject: [PATCH 1/2] Don't use <fenv.h> on uClibc
+
+The python-numpy code already has provisions to not use <fenv.h> when
+not available. However, it uses __GLIBC__ to know whether fenv.h is
+available or not, but uClibc defines __GLIBC__, so python-numpy thinks
+fenv.h is available.
+
+This patch fixes that by changing all defined(__GLIBC__) occurences by
+(defined(__GLIBC__) && !defined(__UCLIBC__)).
+
+Based on patch by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+
+Signed-off-by: Thijs Vermeir <thijsvermeir@gmail.com>
+---
+ numpy/core/include/numpy/ufuncobject.h | 3 ++-
+ numpy/core/src/npymath/ieee754.c.src   | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/numpy/core/include/numpy/ufuncobject.h b/numpy/core/include/numpy/ufuncobject.h
+index e03a7a4..614f8ed 100644
+--- a/numpy/core/include/numpy/ufuncobject.h
++++ b/numpy/core/include/numpy/ufuncobject.h
+@@ -319,7 +319,8 @@ typedef struct _loop1d_info {
+ #if defined(sun) || defined(__BSD__) || defined(__OpenBSD__) || \
+       (defined(__FreeBSD__) && (__FreeBSD_version < 502114)) || \
+       defined(__NetBSD__) || \
+-      defined(__GLIBC__) || defined(__APPLE__) || \
++      (defined(__GLIBC__) && !defined(__UCLIBC__)) || \
++      defined(__APPLE__) || \
+       defined(__CYGWIN__) || defined(__MINGW32__) || \
+       (defined(__FreeBSD__) && (__FreeBSD_version >= 502114)) || \
+       defined(_AIX) || \
+diff --git a/numpy/core/src/npymath/ieee754.c.src b/numpy/core/src/npymath/ieee754.c.src
+index 0370ea6..e63e409 100644
+--- a/numpy/core/src/npymath/ieee754.c.src
++++ b/numpy/core/src/npymath/ieee754.c.src
+@@ -612,7 +612,7 @@ void npy_set_floatstatus_invalid(void)
+ }
+ 
+ 
+-#elif defined(__GLIBC__) || defined(__APPLE__) || \
++#elif (defined(__GLIBC__) && !defined(__UCLIBC__)) || defined(__APPLE__) || \
+       defined(__CYGWIN__) || defined(__MINGW32__) || \
+       (defined(__FreeBSD__) && (__FreeBSD_version >= 502114))
+ #  include <fenv.h>
+-- 
+2.1.0
+
